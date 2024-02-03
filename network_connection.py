@@ -1,11 +1,18 @@
+import tkinter as tk
+from tkinter import ttk
 from zeroconf import ServiceBrowser, Zeroconf, ServiceListener, ServiceInfo
 import socket
 import time
 
 SERVICE_TYPE = "_https._tcp.local."
 
+def get_ip_address():
+    # Получаем IP-адрес устройства
+    return socket.gethostbyname(socket.gethostname())
+
 def register_service():
-    service_name = "MyService"
+    ip_address = get_ip_address()
+    service_name = ip_address
     service_type = SERVICE_TYPE
     service_port = 8080
 
@@ -17,7 +24,6 @@ def register_service():
     )
 
     zeroconf = Zeroconf()
-
     zeroconf.register_service(info, allow_name_change=True)
 
     print("Service '{}' registered on port {}".format(service_name, service_port))
@@ -38,35 +44,50 @@ class MyListener(ServiceListener):
             del self.services[name]
         self.show_services()
 
-
     def add_service(self, zeroconf, type_, name):
-        print(zeroconf)
-        info = zeroconf.get_service_info(type_, name,timeout=5)
+        info = zeroconf.get_service_info(type_, name, timeout=5)
         print('\n', info)
         self.services[name] = {"port": 80}
-        print(f"Service {name} added, address: {None}")
+        print(f"Service {name} added")
         self.show_services()
 
-    
     def update_service(self, zc: Zeroconf, type_: str, name: str) -> None:
         print(f"Service {name} updated")
     
     def show_services(self):
-        print("\nList of available services:")
+        tree.delete(*tree.get_children())
         for name, service in self.services.items():
-            print("Service '{}', port={}".format(name, service["port"]))
+            tree.insert("", "end", values=(name, service["port"]))
 
 
-register_service()
 
-zeroconf = Zeroconf()
+zeroconf = register_service()
 listener = MyListener()
+
+
 browser = ServiceBrowser(zeroconf, SERVICE_TYPE, listener)
 
-try:
-    while True:
-        command = input("Enter 'show' to display services, or press enter to exit: ")
-        if command.lower() == "show":
-            listener.show_services()
-finally:
-    zeroconf.close()
+# Создаем основное окно Tkinter
+root = tk.Tk()
+root.title("Service Browser")
+
+# Создаем и размещаем виджет Treeview для отображения сервисов
+tree = ttk.Treeview(root, columns=("Name", "Address", "Port"), show="headings")
+tree.heading("Name", text="Name")
+tree.heading("Address", text="Address")
+tree.heading("Port", text="Port")
+tree.pack(padx=10, pady=10)
+
+# Создаем кнопку "Show" для отображения сервисов
+show_button = tk.Button(root, text="Show", command=listener.show_services())
+show_button.pack(pady=10)
+
+# Регистрируем сервис и создаем объект MyListener
+
+# Создаем ServiceBrowser для поиска сервисов
+
+# Запускаем главный цикл Tkinter
+root.mainloop()
+
+# Закрываем zeroconf при выходе из главного цикла
+zeroconf.close()
