@@ -8,12 +8,12 @@ import platform
 SERVICE_TYPE = "_https._tcp.local."
 
 def get_ip_address():
-    # Получаем IP-адрес устройства
     return socket.gethostbyname(socket.gethostname())
 
 def register_service():
     ip_address = get_ip_address()
-    service_name = platform.system()
+    service_name = f"{platform.system()}-{ip_address}"
+
     service_type = SERVICE_TYPE
     service_port = 8080
 
@@ -24,17 +24,14 @@ def register_service():
         port=service_port,
         weight=0,
         priority=0,
-        properties={"info": "Additional information about the device"}
+        properties={"info": None}
     )
 
     zeroconf = Zeroconf()
     zeroconf.register_service(info, allow_name_change=True)
     info = zeroconf.get_service_info(SERVICE_TYPE, "{}.{}".format(service_name, service_type))
-    #print(info)
 
-    print("Service '{}' registered on port {}".format(service_name, service_port))
-
-    time.sleep(2)
+    time.sleep(1)
 
     return zeroconf
 
@@ -70,7 +67,7 @@ class MyListener(ServiceListener):
     def show_services(self):
         tree.delete(*tree.get_children())
         for name, service in self.services.items():
-            tree.insert("", "end", values=(name.split('._')[0], service["ip"]))
+            tree.insert("", "end", values=(name.split('._')[0].split('-')[0], service["ip"]))
 
 
 
