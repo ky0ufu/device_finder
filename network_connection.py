@@ -28,7 +28,7 @@ def register_service():
 
     print("Service '{}' registered on port {}".format(service_name, service_port))
 
-    time.sleep(5)
+    time.sleep(2)
 
     return zeroconf
 
@@ -60,7 +60,7 @@ class MyListener(ServiceListener):
             tree.insert("", "end", values=(name, service["port"]))
 
 
-
+print(socket.gethostname())
 zeroconf = register_service()
 listener = MyListener()
 
