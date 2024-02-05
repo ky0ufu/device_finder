@@ -51,7 +51,6 @@ class MyListener(ServiceListener):
 
     def add_service(self, zeroconf, type_, name):
         info = zeroconf.get_service_info(type_, name)
-        print(info)
 
         ip = socket.inet_ntoa(info.addresses[0])
         self.services[name] = {"port": info.port, "ip": ip}
@@ -67,6 +66,8 @@ class MyListener(ServiceListener):
     def show_services(self):
         tree.delete(*tree.get_children())
         for name, service in self.services.items():
+            if service["ip"] == get_ip_address():
+                continue
             tree.insert("", "end", values=(name.split('._')[0].split('-')[0], service["ip"]))
 
 
