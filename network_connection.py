@@ -5,7 +5,7 @@ import socket
 import time
 import platform
 
-SERVICE_TYPE = "_https._tcp.local."
+SERVICE_TYPE = "_devicees._tcp.local."
 
 def get_ip_address():
     return socket.gethostbyname(socket.gethostname())
